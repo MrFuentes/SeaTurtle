@@ -1,8 +1,3 @@
-# Notes:
-# Use Subprocessor module
-# User Manual is important
-
-
 # todo:
 # help: display user manual
 # pause: pause operation of shell until 'Enter' is pressed
@@ -129,23 +124,22 @@ class MyShell(Cmd):
 					overwrite(ls_dir(args[0]),args[2:])  # Overwrites the file's content with the contents of the listed directory
 				except IndexError:
 					print('Usage: dir {} > <filename>'.format(args[0]))  # Shows this error if no filename is specified
-			elif args[0] == '>>':  # If using append output without a specified directory
-				try:
-					append(ls_dir(),args[1:])  # Append the content of the current directory to the specified file
-				except IndexError:
-					print('Usage: dir >> <filename>')  # Shows this error message if no filename is specified
-			elif args[0] == '>':  # If using overwrite output without a specified directory
-				try:
-					overwrite(ls_dir(),args[1:])  # Overwrites file's contents with the content of the current directory
-				except IndexError:
-					print('Usage: dir > <filename>')  # Shows this error message if no filename is specified
-			else:
-				try:
-					print(ls_dir(args[0]))  # prints the content of the specified directory
-				#except TypeError:
-				#	print(ls_dir())
 		except IndexError:
-			print(ls_dir())  # Prints the content of the current directory if no directory is specified
+			try:
+				if args[0] == '>>':  # If using append output without a specified directory
+					try:
+						append(ls_dir(),args[1:])  # Append the content of the current directory to the specified file
+					except IndexError:
+						print('Usage: dir >> <filename>')  # Shows this error message if no filename is specified
+				elif args[0] == '>':  # If using overwrite output without a specified directory
+					try:
+						overwrite(ls_dir(),args[1:])  # Overwrites file's contents with the content of the current directory
+					except IndexError:
+						print('Usage: dir > <filename>')  # Shows this error message if no filename is specified
+				else:
+					print(ls_dir(args[0]))  # prints the content of the specified directory
+			except IndexError:
+				print(ls_dir())  # Prints the content of the current directory if no directory is specified
 
 		#get_dir = multiprocessing.Process(target=ls_dir, args=(arg,))
 		#get_dir.start()
@@ -191,7 +185,8 @@ def ls_dir(directory=None):
 		if  directory != None:  # If a directory is specified
 			return  "\n".join([f for f in os.listdir(directory)]) # Return a string containing all the contents of the specified directory
 		else:   # If no directory is specified
-			return ('\n'.join([f for f in os.listdir()])  # Return a string containing the contents of the current directory
+			return '\n'.join([f for f in os.listdir()])  # Return a string containing the contents of the current directory
+
 	except FileNotFoundError:
 		print('Error: Directory "{}" not found'.format(directory))  # Shows this error message if the directory does not exist
 		
