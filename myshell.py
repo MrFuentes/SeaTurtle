@@ -227,27 +227,84 @@ def from_input(filename):
 
 
 def overwrite(data,args):
+
+	'''
+
+	overwrite
+	=========
+
+	overwrites any data within a file with new data, or creates a new file containing the new data if one doesn't exist
+
+	Parameters
+	----------
+
+	data
+		> List of data you want to write to the file
+	
+	args
+		> List containg the filename to write to
+
+	'''
+
 	try:
-		with open(args[0], 'w+') as f:
+		with open(args[0], 'w+') as f:  # Opens the file, or creates one with that name if it doesn't exist
 			for a in data:
-				f.write(a)
-			f.write('\n')
+				f.write(a)  # Writes the data to the file, overwriting any data that was already contained by the file 
+			f.write('\n')  # Adds a newline character to the end of the file
 	except IndexError:
-		print('Usage: <command> > <filename>')
+		print('Usage: <command> > <filename>')  # Shows this error message if no file was specified
 
 
 def append(data,args):
+
+	'''
+
+	append
+	======
+
+	appends new data to a file, or creates a file containing the new data if one does not exist
+
+	Parameters
+	----------
+
+	data
+		> List of data you want to write to the file
+
+	args
+		> List containing the filename to write to
+
+	'''
+
 	try:
-		with open(args[0], 'a+') as f:
+		with open(args[0], 'a+') as f:  # Opens the file, or creates one with that name if it doesn't exist
 			for a in data:
-				f.write(a)
-			f.write('\n')
+				f.write(a)  # Writes the data to the file, appending to the end of the file if there was already data within the file
+			f.write('\n')  # Adds a newline charater to the end of the file
 	except IndexError:
-		print('Usage: <command> >> <filename>')
+		print('Usage: <command> >> <filename>')  # Shows this error message if no filename was specified
 
 	
 def parse(arg):
-	# Convert arguments into a list
+	
+	'''
+	parse
+	=====
+
+	Gets the command line arguments and returns them as list without the orinal command
+
+	Parameters
+	----------
+
+	arg
+		> command line arguments entered after the command
+
+	Output
+	------
+
+	Returns a list containing all command line arguments after the original command
+
+	'''
+
 	return arg.split()
 
 if __name__ == "__main__":
