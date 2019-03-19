@@ -198,7 +198,7 @@ class MyShell(Cmd):
 		Output
 		------
 
-		Outputs the arguments following the command to the terminal as a string
+		Outputs the arguments following the command as a string
 
 		'''
 
@@ -206,29 +206,29 @@ class MyShell(Cmd):
 		comment = []
 		count = 0
 		for i in range(0, len(args)):
-			if args[i] == '>':
-				echoed = get_echo(comment)
+			if args[i] == '>':  # If using overwrite
+				echoed = get_echo(comment)  # concatenate preceding arguments to a string
 				try:
-					overwrite([echoed],args[i+1:])
+					overwrite([echoed],args[i+1:])  # outputs the string to the given file
 					break
 				except IndexError:
-					print('Error: No filename given')
+					print('Error: No filename given')  # prints this error message if no filename is given
 					print('Usage: echo <comment> > <filename>')
 					break
-			elif args[i] == '>>':
-				echoed = get_echo(comment)
+			elif args[i] == '>>':  # If using append
+				echoed = get_echo(comment)  # concatenate preceding arguments to a string
 				try:
-					append([echoed],args[i+1])
+					append([echoed],args[i+1])  # outputs the string to the given file
 					break
 				except IndexError:
-					print('Error: No filename given')
+					print('Error: No filename given')  # shows this error if no filename is given
 					print('Usage: echo <comment> >> <filename>')
 					break
 			else:
-				comment.append(args[i])
+				comment.append(args[i])  # appends arguments that are not output commands to a list
 				count += 1
-		if count == len(args):
-			print(get_echo(comment))
+		if count == len(args):  # If the loop did not break early, meaning there were no output commands
+			print(get_echo(comment))  # Print the concatenated list of arguments as a string
 
 
 	def do_quit(self,arg):
@@ -246,6 +246,27 @@ class MyShell(Cmd):
 
 
 def get_echo(comment):
+
+	'''
+
+	get_echo
+	========
+
+	Concatenates a list to a single string
+
+	parameters
+	----------
+
+	comment
+		> list containing the data you want to concatenate to a string
+
+	output
+	------
+
+	Returns a string of the contents of the given list
+
+	'''
+
 	return " ".join(comment)
 
 def ls_dir(directory=None):
