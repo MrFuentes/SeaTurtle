@@ -7,13 +7,11 @@
  all other commands fork programs into it's child processes
  must be able to take input form a file/batchfile implementation
  & executes program as backgroud process
- cd <directory>: change directory
- environ: list all environment strings
  -----------------------------------------------------------------------
  
  In Progress:
  =======================================================================
- echo <comment>: print <comment> to command line followed by a \n
+ environ: list all environment strings
  -----------------------------------------------------------------------
  
  Maybe ImplementedL
@@ -30,6 +28,8 @@
  < file as input
  >> appends existing file or creates new file
  clr: clear screen
+ echo <comment>: print <comment> to command line followed by a \n
+ cd <directory>: change directory
  -----------------------------------------------------------------------
 
 '''
@@ -46,7 +46,7 @@ class MyShell(Cmd):
 
 
 	'''
-	
+ 	
 	MyShell
 	=======
 
@@ -78,12 +78,12 @@ class MyShell(Cmd):
 	'''
 
 
-	intro = 'Type "help" to bring up a list of commands.\n'		# Promt that comes up when the shell is launched
-	os.environ['SHELL'] = os.getcwd()+'/MyShell'		# Sets $SHELL to "(LaunchDirectory)/MyShell" 
-	if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:	
-		prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])		# If CWD is in $HOME(/home/user/) display $HOME as "~/"
+	intro = 'Type "help" to bring up a list of commands.\n'	 # Promt that comes up when the shell is launched
+	os.environ['SHELL'] = os.getcwd()+'/MyShell'  # Sets $SHELL to "(LaunchDirectory)/MyShell" 
+	if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:
+		prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
 	else:
-		prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())		# otherwise display true directory
+		prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
 	file = None
 
 	def do_dir(self,arg):
@@ -231,6 +231,63 @@ class MyShell(Cmd):
 			print(get_echo(comment))  # Print the concatenated list of arguments as a string
 
 
+	def do_cd(self,arg):
+
+		'''
+
+		do_cd
+		=====
+
+		changes directory do given directory or $HOME if no directroy is given
+
+		'''
+
+		args = parse(arg)
+		try:
+			os.chdir(args[0])  # changes directory to given directory
+			if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:	
+				MyShell.prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
+			else:
+				MyShell.prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
+		except FileNotFoundError:
+			print('Error: No such directory')  # displays this error message if the given file does not exist
+		except IndexError:
+			os.chdir(os.environ['HOME'])  # if no directory is given, change directory to $HOME
+			if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:	
+				MyShell.prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
+			else:
+				MyShell.prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
+
+
+	def do_environ(self, arg):
+		
+		'''
+		
+		do_environ
+		==========
+
+		prints all environment variables, separated by \n when 'environ' is typed into the command line
+		
+		'''
+
+		args = parse(arg)  # converts arg to a list
+		try:
+			if args[0] == '>':  # If using overwrite
+				try:
+					overwrite(get_environ(), args[1:])  # Output environment strings to the specified file
+				except IndexError:
+					print('Error: No filename given')  # Print this Error message if no filename is given
+					print('Usage: environ > <filename>')
+			elif args[0] == '>>':  # If using append
+				try:	
+					append(get_environ(), args[1:])  # 
+				except IndexError:
+					print('Error: No filename given')  # Print this Error message if no filename is given
+					print('Usage: environ >> <filename>')
+		except IndexError:
+			print("\n".join(get_environ()))
+
+
 	def do_quit(self,arg):
 
 		'''
@@ -243,6 +300,23 @@ class MyShell(Cmd):
 		'''
 
 		exit()
+
+
+def get_environ():
+
+	'''
+
+	get_environ
+	===========
+
+	returns a list containing all the environment variables and their values as strings
+	
+	'''
+	
+	env_list = []
+	for k in os.environ:
+		env_list.append('{} : {}'.format(k, os.environ[k]))	
+	return env_list
 
 
 def get_echo(comment):
@@ -268,6 +342,7 @@ def get_echo(comment):
 	'''
 
 	return " ".join(comment)
+
 
 def ls_dir(directory=None):
 
