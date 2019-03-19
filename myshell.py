@@ -1,26 +1,38 @@
-# todo:
-# help: display user manual
-# pause: pause operation of shell until 'Enter' is pressed
-# all other commands fork programs into it's child processes
-# must be able to take input form a file/batchfile implementation
-# & executes program as backgroud process
-# clr: clear screen
-# echo <comment>: print <comment> to command line followed by a \n
-# cd <directory>: change directory
-# environ: list all environment strings
+'''
+ 
+ To Do:
+ =======================================================================
+ help: display user manual
+ pause: pause operation of shell until 'Enter' is pressed
+ all other commands fork programs into it's child processes
+ must be able to take input form a file/batchfile implementation
+ & executes program as backgroud process
+ cd <directory>: change directory
+ environ: list all environment strings
+ -----------------------------------------------------------------------
+ 
+ In Progress:
+ =======================================================================
+ echo <comment>: print <comment> to command line followed by a \n
+ -----------------------------------------------------------------------
+ 
+ Maybe ImplementedL
+ =======================================================================
+ ??? shell=<pathname>/myshell where path is where shell was executed ???
+ -----------------------------------------------------------------------
+ 
+ Implemented:
+ =======================================================================
+ quit: exit the shell
+ dir <directory>: list directory contents
+ > truncates existing file or creates new file
+ i/o redirection: program >> file / program > file
+ < file as input
+ >> appends existing file or creates new file
+ clr: clear screen
+ -----------------------------------------------------------------------
 
-# Maybe Implemented:
-# ??? shell=<pathname>/myshell where path is where shell was executed ???
-
-# Implemented:
-# quit: exit the shell
-# dir <directory>: list directory contents
-# > truncates existing file or creates new file
-# i/o redirection: program >> file / program > file
-# < file as input
-# >> appends existing file or creates new file
-
-
+'''
 
 #!/usr/bin/env python3
 
@@ -34,6 +46,7 @@ class MyShell(Cmd):
 
 
 	'''
+	
 	MyShell
 	=======
 
@@ -61,6 +74,7 @@ class MyShell(Cmd):
 	prompt: str
 		> Lists the username, hostname and currrent directory
 		> If in $HOME shortens $HOME to "~/"
+
 	'''
 
 
@@ -102,27 +116,32 @@ class MyShell(Cmd):
 							try:
 								append(ls_dir(data[0]),args[3:])  # append contents to the file
 							except IndexError:
+								print('Error: No filename given')
 								print('Usage: dir < {} >> <filename>'.format(data[0]))  # Shows this error message if no filename specified
 						elif args[2] == '>':
 							try:
 								overwrite(ls_dir(data[0]), args[3:])  # overwrite the data in the file with the contents
 							except IndexError:
+								print('Error: No filename given')
 								print('Usage: dir < {} >> <filename>'.format(data[0]))  # Shows this error message if no filename specified
 						else:
 							print(ls_dir(data[0]))  # Prints the contents if standard output not being used
 					except IndexError:
 						print(ls_dir(data[0]))  # Prints the contents if standard output not being used
 				except IndexError:
+					print('Error: No filename given')
 					print('Usage: dir < <filename>')  # shows this error message if no filename was specified
 			elif args[1] == '>>':  # If using append output with a specific directory
 				try:
 					append(ls_dir(args[0]),args[2:])  # Appends the content from the named directory to the filename specified
 				except IndexError:
+					print('Error: No filename given')
 					print('Usage: dir {} >> <filename>'.format(args[0])) # Shows this error if no filename is specified 
 			elif args[1] == '>':  # If using overwrite output with a specific directory
 				try:
 					overwrite(ls_dir(args[0]),args[2:])  # Overwrites the file's content with the contents of the listed directory
 				except IndexError:
+					print('Error: No filename given')
 					print('Usage: dir {} > <filename>'.format(args[0]))  # Shows this error if no filename is specified
 		except IndexError:
 			try:
@@ -130,11 +149,13 @@ class MyShell(Cmd):
 					try:
 						append(ls_dir(),args[1:])  # Append the content of the current directory to the specified file
 					except IndexError:
+						print('Error: No filename given')
 						print('Usage: dir >> <filename>')  # Shows this error message if no filename is specified
 				elif args[0] == '>':  # If using overwrite output without a specified directory
 					try:
 						overwrite(ls_dir(),args[1:])  # Overwrites file's contents with the content of the current directory
 					except IndexError:
+						print('Error: No filename given')
 						print('Usage: dir > <filename>')  # Shows this error message if no filename is specified
 				else:
 					print(ls_dir(args[0]))  # prints the content of the specified directory
@@ -145,9 +166,75 @@ class MyShell(Cmd):
 		#get_dir.start()
 	
 
+	def do_clr(self, arg):
+		
+		'''
+
+		do_clr
+		======
+
+		Clears the terminal when "clr" is typed into the shell
+
+		'''
+
+		os.system('clear') # clears the terminal
+
+
+	def do_echo(self,arg):
+		
+		'''
+		
+		do_echo
+		=======
+
+		Prints the arguments to the terminal
+
+		Paramters
+		---------
+		
+		arg
+			> command line arguemnts to be joined into a string
+
+		Output
+		------
+
+		Outputs the arguments following the command to the terminal as a string
+
+		'''
+
+		args = parse(arg)
+		comment = []
+		count = 0
+		for i in range(0, len(args)):
+			if args[i] == '>':
+				echoed = get_echo(comment)
+				try:
+					overwrite([echoed],args[i+1:])
+					break
+				except IndexError:
+					print('Error: No filename given')
+					print('Usage: echo <comment> > <filename>')
+					break
+			elif args[i] == '>>':
+				echoed = get_echo(comment)
+				try:
+					append([echoed],args[i+1])
+					break
+				except IndexError:
+					print('Error: No filename given')
+					print('Usage: echo <comment> >> <filename>')
+					break
+			else:
+				comment.append(args[i])
+				count += 1
+		if count == len(args):
+			print(get_echo(comment))
+
+
 	def do_quit(self,arg):
 
 		'''
+
 		do_exit
 		=======
 
@@ -157,6 +244,9 @@ class MyShell(Cmd):
 
 		exit()
 
+
+def get_echo(comment):
+	return " ".join(comment)
 
 def ls_dir(directory=None):
 
@@ -282,6 +372,7 @@ def append(data,args):
 def parse(arg):
 	
 	'''
+
 	parse
 	=====
 
