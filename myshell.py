@@ -4,17 +4,14 @@
  =======================================================================
  help: display user manual
  pause: pause operation of shell until 'Enter' is pressed
- all other commands fork programs into it's child processes
- must be able to take input form a file/batchfile implementation
- & executes program as backgroud process
  -----------------------------------------------------------------------
  
  In Progress:
  =======================================================================
- environ: list all environment strings
+ must be able to take input form a file/batchfile implementation
  -----------------------------------------------------------------------
  
- Maybe ImplementedL
+ Maybe Implemented
  =======================================================================
  ??? shell=<pathname>/myshell where path is where shell was executed ???
  -----------------------------------------------------------------------
@@ -30,6 +27,9 @@
  clr: clear screen
  echo <comment>: print <comment> to command line followed by a \n
  cd <directory>: change directory
+ environ: list all environment strings
+ all other commands fork programs into it's child processes
+ & executes program as backgroud process
  -----------------------------------------------------------------------
 
 '''
@@ -37,43 +37,46 @@
 #!/usr/bin/env python3
 
 from cmd import Cmd
-import multiprocessing
+import subprocess
 import os
 import sys
 
 
-class MyShell(Cmd):
+class SeaTurtle(Cmd):
 
 
 	'''
  	
-	MyShell
-	=======
+SeaTurtle	
+=========
 
-	Waits for a command line input, then executes the input when it is recieved
+Waits for a command line input, then executes the input when it is recieved
 
-	Commands
-	--------
+Commands
+--------
 
-	dir <directory_name>: Lists the contents of the named directory, or the current directory if no directory is specified
+dir <directory_name>: Lists the contents of the named directory,
+or the current directory if no directory is specified
 	
-	<command> < <file_name>: Uses the listed file's content as the input for the command
+<command> < <file_name>: Uses the listed file's content as the input for the command
 	
-	<command> <paramters> > <file_name>: Writes the output of the specified command to the listed file, overwriting any existing data, or creating a new file if it doesn't exist
+<command> <paramters> > <file_name>: Writes the output of the specified command to the listed file,
+overwriting any existing data, or creating a new file if it doesn't exist
 
-	<command> <parameters> >> <file_name>: Writes the output of the specified command to the listed file, appending to any existing data, or creating a new file if it doesn't exist
+<command> <parameters> >> <file_name>: Writes the output of the specified command to the listed file,
+appending to any existing data, or creating a new file if it doesn't exist
 
-	quit: Exits the shell
+quit: Exits the shell
 
-	Variables
-	---------
+Variables
+---------
 
-	intro: str
-		> String that is printed when the shell is launched
+intro: str
+	> String that is printed when the shell is launched
 	
-	prompt: str
-		> Lists the username, hostname and currrent directory
-		> If in $HOME shortens $HOME to "~/"
+prompt: str
+	> Lists the username, hostname and currrent directory
+	> If in $HOME shortens $HOME to "~/"
 
 	'''
 
@@ -84,24 +87,57 @@ class MyShell(Cmd):
 		prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
 	else:
 		prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
-	file = None
+
+	
+	def default(self, arg):
+		args = parse(arg)
+		try:
+			if args[-1] == '&':
+				for i in range(0, len(args[:-1])):
+					if args[i] == '>':
+						try:
+							overwrite(subprocess.Popen(args[:i]),args[i+1:])
+						except IndexError:
+							print('Error: No filename given')
+					elif args[i] == '>>':
+						try:
+							append(subprocess.Popen(args[:i],args[i+1]))
+						except IndexError:
+							print('Error: No filename given')
+					else:
+						try:
+							subprocess.Popen(args[:-1])
+						except FileNotFoundError:
+							print('Error: No such command')
+
+			else:
+				try:
+					subprocess.run(args)
+				except FileNotFoundError:
+					print('Error: No such command')
+		except IndexError:
+			try:
+				subprocess.run(args)
+			except FileNotFoundError:
+				print('Error: No such command')
+			
 
 	def do_dir(self,arg):
 		
 
 		'''
+	
+dir
+===
 		
-		do_dir
-		======
-		
-		lists directory content when "dir" is typed into the shell
+lists directory content when "dir" is typed into the shell
 
-		Parameters
-		----------
+Parameters
+----------
 
-		directory:
-			> If present in arguments, will list the contents of that directory
-			> Else it will list the contents of the current directory
+directory:
+	> If present in arguments, will list the contents of that directory
+	> Else it will list the contents of the current directory
 
 		'''
 
@@ -115,17 +151,21 @@ class MyShell(Cmd):
 						if args[2] == '>>':  # If using output to append data
 							try:
 								append(ls_dir(data[0]),args[3:])  # append contents to the file
-							except IndexError:
+							except IndexError:  
+								# Shows this error message if no filename specified
 								print('Error: No filename given')
-								print('Usage: dir < {} >> <filename>'.format(data[0]))  # Shows this error message if no filename specified
+								print('Usage: dir < {} >> <filename>'.format(data[0]))
 						elif args[2] == '>':
 							try:
-								overwrite(ls_dir(data[0]), args[3:])  # overwrite the data in the file with the contents
+								# overwrite the data in the file with the contents
+								overwrite(ls_dir(data[0]), args[3:])  
 							except IndexError:
+  								# Shows this error message if no filename specified
 								print('Error: No filename given')
-								print('Usage: dir < {} >> <filename>'.format(data[0]))  # Shows this error message if no filename specified
-						else:
-							print(ls_dir(data[0]))  # Prints the contents if standard output not being used
+								print('Usage: dir < {} >> <filename>'.format(data[0]))
+						else:  
+							# Prints the contents if standard output not being used
+							print(ls_dir(data[0]))
 					except IndexError:
 						print(ls_dir(data[0]))  # Prints the contents if standard output not being used
 				except IndexError:
@@ -162,18 +202,16 @@ class MyShell(Cmd):
 			except IndexError:
 				print(ls_dir())  # Prints the content of the current directory if no directory is specified
 
-		#get_dir = multiprocessing.Process(target=ls_dir, args=(arg,))
-		#get_dir.start()
 	
 
 	def do_clr(self, arg):
 		
 		'''
 
-		do_clr
-		======
+clr
+===
 
-		Clears the terminal when "clr" is typed into the shell
+Clears the terminal when "clr" is typed into the shell
 
 		'''
 
@@ -184,21 +222,21 @@ class MyShell(Cmd):
 		
 		'''
 		
-		do_echo
-		=======
+echo
+====
 
-		Prints the arguments to the terminal
+Prints the arguments to the terminal
 
-		Paramters
-		---------
+Paramters
+---------
 		
-		arg
-			> command line arguemnts to be joined into a string
+arg
+> command line arguemnts to be joined into a string
 
-		Output
-		------
+Output
+------
 
-		Outputs the arguments following the command as a string
+Outputs the arguments following the command as a string
 
 		'''
 
@@ -218,7 +256,7 @@ class MyShell(Cmd):
 			elif args[i] == '>>':  # If using append
 				echoed = get_echo(comment)  # concatenate preceding arguments to a string
 				try:
-					append([echoed],args[i+1])  # outputs the string to the given file
+					append([echoed],args[i+1:])  # outputs the string to the given file
 					break
 				except IndexError:
 					print('Error: No filename given')  # shows this error if no filename is given
@@ -235,38 +273,40 @@ class MyShell(Cmd):
 
 		'''
 
-		do_cd
-		=====
+cd
+==
 
-		changes directory do given directory or $HOME if no directroy is given
+changes directory do given directory or display current directory if no directroy is given
 
 		'''
 
 		args = parse(arg)
 		try:
 			os.chdir(args[0])  # changes directory to given directory
+			os.environ['PWD'] = os.getcwd()
 			if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:	
-				MyShell.prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
+				SeaTurtle.prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
 			else:
-				MyShell.prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
+				SeaTurtle.prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
 		except FileNotFoundError:
 			print('Error: No such directory')  # displays this error message if the given file does not exist
 		except IndexError:
-			os.chdir(os.environ['HOME'])  # if no directory is given, change directory to $HOME
-			if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:	
-				MyShell.prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
-			else:
-				MyShell.prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
+			print(os.getcwd())
+			#os.chdir(os.environ['HOME'])  # if no directory is given, change directory to $HOME
+			#if os.environ['HOME'] == os.getcwd()[0:len(os.environ['HOME'])]:	
+			#	SeaTurtle.prompt = '{}@{} ~{} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd()[len(os.environ['HOME']):])  # If CWD is in $HOME(/home/user/) display $HOME as "~/"
+			#else:
+			#	SeaTurtle.prompt = '{}@{} {} $ '.format(os.environ['USER'],os.uname()[1],os.getcwd())  # otherwise display true directory
 
 
 	def do_environ(self, arg):
 		
 		'''
 		
-		do_environ
-		==========
+environ
+=======
 
-		prints all environment variables, separated by \n when 'environ' is typed into the command line
+prints all environment variables, separated by \n when 'environ' is typed into the command line
 		
 		'''
 
@@ -292,10 +332,10 @@ class MyShell(Cmd):
 
 		'''
 
-		do_exit
-		=======
+exit
+====
 
-		Exits the shell when "quit" is typed into the shell
+Exits the shell when "quit" is typed into the shell
 
 		'''
 
@@ -306,10 +346,10 @@ def get_environ():
 
 	'''
 
-	get_environ
-	===========
+get_environ
+===========
 
-	returns a list containing all the environment variables and their values as strings
+returns a list containing all the environment variables and their values as strings
 	
 	'''
 	
@@ -323,21 +363,21 @@ def get_echo(comment):
 
 	'''
 
-	get_echo
-	========
+get_echo
+========
 
-	Concatenates a list to a single string
+Concatenates a list to a single string
 
-	parameters
-	----------
+parameters
+----------
 
-	comment
-		> list containing the data you want to concatenate to a string
+comment
+	> list containing the data you want to concatenate to a string
 
-	output
-	------
+output
+------
 
-	Returns a string of the contents of the given list
+Returns a string of the contents of the given list
 
 	'''
 
@@ -348,22 +388,22 @@ def ls_dir(directory=None):
 
 	'''
 	
-	ls_dir
-	======
+ls_dir
+======
 
-	Returns the contents of a directory as a string
+Returns the contents of a directory as a string
 
-	Parameters
-	----------
+Parameters
+----------
 
-	directory
-		> directory who's contents you want to get
-		> defaults to current directory
+directory
+	> directory who's contents you want to get
+	> defaults to current directory
 
-	Output
-	------
+Output
+------
 
-	Outputs a string containing all the contents of <directory> joined by a newline character
+Outputs a string containing all the contents of <directory> joined by a newline character
 
 	'''
 
@@ -382,21 +422,21 @@ def from_input(filename):
 	
 	'''
 
-	from_input
-	==========
+from_input
+==========
 
-	gets content from the specified file and returns it as a list
+gets content from the specified file and returns it as a list
 
-	Parameters
-	----------
+Parameters
+----------
 
-	filename
-		> filename you want to get the content from
+filename
+	> filename you want to get the content from
 
-	Output
-	------
+Output
+------
 
-	returns a list of the content from <filename>
+returns a list of the content from <filename>
 
 	'''
 
@@ -411,19 +451,19 @@ def overwrite(data,args):
 
 	'''
 
-	overwrite
-	=========
+overwrite
+=========
 
-	overwrites any data within a file with new data, or creates a new file containing the new data if one doesn't exist
+overwrites any data within a file with new data, or creates a new file containing the new data if one doesn't exist
 
-	Parameters
-	----------
+Parameters
+----------
 
-	data
-		> List of data you want to write to the file
-	
-	args
-		> List containg the filename to write to
+data
+	> List of data you want to write to the file
+
+args
+	> List containg the filename to write to
 
 	'''
 
@@ -440,19 +480,19 @@ def append(data,args):
 
 	'''
 
-	append
-	======
+append
+======
 
-	appends new data to a file, or creates a file containing the new data if one does not exist
+appends new data to a file, or creates a file containing the new data if one does not exist
 
-	Parameters
-	----------
+Parameters
+----------
 
-	data
-		> List of data you want to write to the file
+data
+	> List of data you want to write to the file
 
-	args
-		> List containing the filename to write to
+args
+	> List containing the filename to write to
 
 	'''
 
@@ -469,25 +509,26 @@ def parse(arg):
 	
 	'''
 
-	parse
-	=====
+parse
+=====
 
-	Gets the command line arguments and returns them as list without the orinal command
+Gets the command line arguments and returns them as list without the orinal command
 
-	Parameters
-	----------
+Parameters
+----------
 
-	arg
-		> command line arguments entered after the command
+arg
+	> command line arguments entered after the command
 
-	Output
-	------
+Output
+------
 
-	Returns a list containing all command line arguments after the original command
+Returns a list containing all command line arguments after the original command
 
 	'''
 
 	return arg.split()
 
+
 if __name__ == "__main__":
-	MyShell().cmdloop()
+	SeaTurtle().cmdloop()
