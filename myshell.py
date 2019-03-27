@@ -6,8 +6,8 @@ import sys
 
 
 class SeaTurtle(Cmd):
-    '''Waits for a command line input,
-    then executes the input when it is recieved'''
+    '''\nWaits for a command line input,\
+ then executes the input when it is recieved\n'''
     # Promt that comes up when the shell is launched
     intro = 'Type "help" to bring up a list of commands.\n'
     # Sets $SHELL to "(LaunchDirectory)/MyShell"
@@ -27,45 +27,51 @@ class SeaTurtle(Cmd):
                                       os.getcwd()
                                      )
 
-#    def __init__(self, queue=[]):
-#        Cmd.__init__(self)
-#        self.cmdqueue = queue
-
     def default(self, arg):
 
+        '''\nRuns as a subprocess if the command is not built in\n'''
         args = parse(arg)
         try:
             if args[-1] == '&':
+                # Runs program as a background process
                 for i in range(0, len(args[:-1])):
                     if args[i] == '>':
+                        # Using overwrite output
                         try:
                             overwrite(subprocess.Popen(args[:i]), args[i+1:])
                         except IndexError:
+                            # If no filename given
                             print('Error: No filename given')
                     elif args[i] == '>>':
+                        # Using append overwrite
                         try:
                             append(subprocess.Popen(args[:i], args[i+1]))
                         except IndexError:
+                            # If no filename given
                             print('Error: No filename given')
                     else:
                         try:
                             subprocess.Popen(args[:-1])
                         except FileNotFoundError:
+                            # If the command doesn't exist
                             print('Error: No such command')
             else:
                 try:
                     subprocess.run(args)
                 except FileNotFoundError:
+                    # If the command doesn't exist
                     print('Error: No such command')
         except IndexError:
+            # If command with no arguments given
             try:
                 subprocess.run(args)
             except FileNotFoundError:
+                # If the command doesn't exist
                 print('Error: No such command')
 
     def do_dir(self, arg):
-        '''lists the contents of a directory,
-         or prints the current directory if no arguemts are given'''
+        '''\nlists the contents of a directory, \
+or prints the current directory if no arguemts are given\n'''
         # Gets list of command line arguments
         args = parse(arg)
         try:
@@ -156,12 +162,12 @@ class SeaTurtle(Cmd):
 
     def do_clr(self, arg):
 
-        '''Clears the terminal'''
+        '''\nClears the terminal\n'''
         os.system('clear')
 
     def do_echo(self, arg):
 
-        '''Prints the arguments to the terminal'''
+        '''\nPrints the arguments to the terminal\n'''
         args = parse(arg)
         comment = []
         count = 0
@@ -203,8 +209,8 @@ class SeaTurtle(Cmd):
 
     def do_cd(self, arg):
 
-        '''changes directory do given directory or
-        display current directory if no directroy is given'''
+        '''\nchanges directory do given directory or \
+display current directory if no directroy is given\n'''
         args = parse(arg)
         try:
             # changes directory to given directory
@@ -237,7 +243,7 @@ class SeaTurtle(Cmd):
 
     def do_environ(self, arg):
 
-        '''prints all environment variables, separated by \n'''
+        '''\nprints all environment variables, separated by a newline\n'''
         # converts arg to a list
         args = parse(arg)
         try:
@@ -262,16 +268,21 @@ class SeaTurtle(Cmd):
         except IndexError:
             print("\n".join(get_environ()))
 
+    def do_pause(self, arg):
+
+        '''\nPause shell functions until return key is pressed\n'''
+        input()
+
     def do_quit(self, arg):
 
-        '''Exits the shell'''
+        '''\nExits the shell\n'''
         exit()
 
 
 def get_environ():
 
-    '''returns a list containing all the environment
-    variables and their values as strings'''
+    '''\nreturns a list containing all the environment \
+variables and their values as strings\n'''
     env_list = []
     for k in os.environ:
         env_list.append('{} : {}'.format(k, os.environ[k]))
@@ -280,13 +291,13 @@ def get_environ():
 
 def get_echo(comment):
 
-    '''Concatenates a list to a single string'''
+    '''\nConcatenates a list to a single string\n'''
     return " ".join(comment)
 
 
 def ls_dir(directory=None):
 
-    '''Returns the contents of a directory as a string'''
+    '''\nReturns the contents of a directory as a string\n'''
     try:
         # If a directory is specified
         if directory is not None:
@@ -303,7 +314,7 @@ def ls_dir(directory=None):
 
 def from_input(filename):
 
-    '''gets content from the specified file and returns it as a list'''
+    '''\ngets content from the specified file and returns it as a list\n'''
     try:
         with open(filename, 'r') as f:
             # returns a list of all the lines contained in the file
@@ -315,8 +326,8 @@ def from_input(filename):
 
 def overwrite(data, args):
 
-    '''overwrites any data within a file with new data,
-    or creates a new file containing the new data if one doesn't exist'''
+    '''\noverwrites any data within a file with new data, \
+or creates a new file containing the new data if one doesn't exist\n'''
     try:
         # Opens the file, or creates one with that name if it doesn't exist
         with open(args[0], 'w+') as f:
@@ -332,8 +343,8 @@ def overwrite(data, args):
 
 def append(data, args):
 
-    '''appends new data to a file, or creates a file containing the new data if
-    one does not exist'''
+    '''\nappends new data to a file, or creates a file containing the new data if \
+one does not exist\n'''
     try:
         # Opens the file, or creates one with that name if it doesn't exist
         with open(args[0], 'a+') as f:
@@ -349,13 +360,14 @@ def append(data, args):
 
 def parse(arg):
 
-    '''Gets the command line arguments and returns them as list without the
-    original command'''
+    '''\nGets the command line arguments and returns them as list without the \
+original command\n'''
     return arg.split()
 
 
 if __name__ == "__main__":
     try:
+        # If using batch file
         with open(sys.argv[1], 'r') as f:
             st = SeaTurtle()
             queue = f.readlines()
@@ -363,7 +375,5 @@ if __name__ == "__main__":
             st.cmdqueue = queue
             st.intro = None
             st.cmdloop()
-            # st = SeaTurtle(queue)  
-            # st.cmdloop()
     except IndexError:
         SeaTurtle().cmdloop()
