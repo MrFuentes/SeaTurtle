@@ -5,30 +5,78 @@ SeaTurtle \- A simple shell built in python3.7.2
 
 .SH SYNOPSIS
 .B python3 myshell.py
-.IR file 
+\fB[file]\fP
 
 .SH DESCRIPTION
 .B python3 myshell.py
 opens the shell
 
-.SH OPTIONS
-.IR file
-executes the commands given in the batch file and quits after completing them.
 
-.SH "SHELL COMMANDS"
-.BI dir 
-.IR path/to/directory
+.SH USAGE
+.SS Options
+.TP
+\fB[file]\fP
+Executes the commands in the file and then exits the shell.
+
+.SS "Shell Commands"
+.TP
+\fBdir\fP [path/to/directory|< filename] [> filename|>> filename]
 .IP
 Returns the contents of the given directory, or prints the current directory if no argument is given.
 
-.BI clr
+.TP
+\fBclr\fP
 .IP
 Clears the terminal
 
-.BI echo
-.IR comment
+.TP
+\fBecho\fP comment|< filename [> filename|>> filename]
 .IP
-Prints the comment back out to the terminal
+Prints the comment back out to the terminal.
+
+.TP
+\fBcd\fP [path/to/directory|< filename]
+.IP
+Changes the current directory to the given one, or displays the current path if none is given.
+
+.TP
+\fBenviron\fP [> filename|>> filename]
+.IP
+Returns all environment variables and their respective values.
+
+.TP
+\fBpause\fP
+.IP
+Pauses use of the shell until the return key is pressed.
+
+.TP
+\fBquit\fP
+.IP
+Closes the shell
+
+.SS "Subprocesses"
+.TP
+\fBProcess\fP [< filename] [> filename|>> filename] [&]
+.IP
+If the given command is not a built-in function of the shell, it will be executed as a child process, for example \fBpython3 foo.py\fP is perfectly valid and will execute as normal.
+.IP
+Using \fB&\fP at the end of the line will cause the process to be forked and the shell will return to the prompt after executing said process.
+
+.SS "I/O Redirection"
+.TP
+\fBcommand < <filename>\fP
+.IP
+Uses the given file as input for the command.
+
+.TP
+\fBcommand >> <filename>\fP
+.IP
+Appends the output of the command to the given file.
+
+.TP
+\fBcommand > <filename>\fP
+.IP
+Overwrites data in the given file with the output of the command.
 
 .SH AUTHOR
-Sean Moloney
+Sean Moloney <https://github.com/MrFuentes>
