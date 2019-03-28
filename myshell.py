@@ -163,7 +163,7 @@ or prints the current directory if no arguemts are given\n'''
     def do_clr(self, arg):
 
         '''\nClears the terminal\n'''
-        os.system('clear')
+        print("\x1b[2J\x1b[H")
 
     def do_echo(self, arg):
 
