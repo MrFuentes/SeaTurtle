@@ -27,6 +27,9 @@ class SeaTurtle(Cmd):
                                       os.getcwd()
                                      )
 
+    def emptyline(self, arg=None):
+        print('',end='')
+
     def default(self, arg):
 
         '''\nRuns as a subprocess if the command is not built in\n'''
@@ -133,37 +136,35 @@ or prints the current directory if no arguemts are given\n'''
                     # Shows this error if no filename is specified
                     print('Error: No filename given')
                     print('Usage: dir {} > <filename>'.format(args[0]))
-        except IndexError:
-            try:
                 # If using append output without a specified directory
-                if args[0] == '>>':
-                    try:
-                        # Append to the specified file
-                        append(ls_dir(), args[1:])
-                    except IndexError:
-                        # If no filename is specified
-                        print('Error: No filename given')
-                        print('Usage: dir >> <filename>')
-                elif args[0] == '>':
-                    # If using overwrite without a specified directory
-                    try:
-                        # Overwrites file's contents
-                        overwrite(ls_dir(), args[1:])
-                    except IndexError:
-                        # If no filename is specified
-                        print('Error: No filename given')
-                        print('Usage: dir > <filename>')
-                else:
-                    # prints the content of the specified directory
-                    print(ls_dir(args[0]))
-            except IndexError:
-                # Prints the content of the current directory
-                print(ls_dir())
+            elif args[0] == '>>':
+                try:
+                    # Append to the specified file
+                    append([ls_dir()], args[1:])
+                except IndexError:
+                    # If no filename is specified
+                    print('Error: No filename given')
+                    print('Usage: dir >> <filename>')
+            elif args[0] == '>':
+                # If using overwrite without a specified directory
+                try:
+                    # Overwrites file's contents
+                    overwrite([ls_dir()], args[1:])
+                except IndexError:
+                    # If no filename is specified
+                    print('Error: No filename given')
+                    print('Usage: dir > <filename>')
+            else:
+                # prints the content of the specified directory
+                print(ls_dir(args[0]))
+        except IndexError:
+            # Prints the content of the current directory
+            print(ls_dir())
 
     def do_clr(self, arg):
 
         '''\nClears the terminal\n'''
-        print("\x1b[2J\x1b[H")
+        print("\x1b[J\x1b[H")
 
     def do_echo(self, arg):
 
@@ -306,7 +307,7 @@ def ls_dir(directory=None):
         # If no directory is specified
         else:
             # Return a string containing the contents of the current directory
-            return '\n'.join([f for f in os.listdir()])
+            return '\n'.join([f for f in os.listdir(os.getcwd())])
     except FileNotFoundError:
         # Shows this error message if the directory does not exist
         print('Error: Directory "{}" not found'.format(directory))
