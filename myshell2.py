@@ -17,8 +17,7 @@ class MyShell():
         os.environ['SHELL'] = os.getcwd()+'/MyShell'
         env_len = len(os.environ['HOME'])
         if os.environ['HOME'] in os.getcwd():
-            # shortens /Home/user/ to ~/
-            self.prompt = f"{user}@{host} {'~' + cwd[env_len:]}$ "
+            self.prompt = f"{user}@{host} ~{cwd[env_len:]}$ "
         else:
             # if not in /Home/user/
             self.prompt = f"{user}@{host} {cwd}$ "
@@ -43,20 +42,28 @@ class MyShell():
                           }
 
     def pre(self):
+        # Prints the help prompt when the shell is first opened
         print('type "help" for a list of commands')
         self.line()
 
     def line(self):
 
+        ''' Main loop of the shell program '''
+
+        # Takes user input as a list of arguments
         args = input(self.prompt).split(" ")
         invalid = f'Error: "{args[0]}" is not a valid command'
         try:
+            # If the command is a shell command
             self.dispatcher[args[0]](args[1:])
             self.line()
         except KeyError:
+            # If the command is not a shell command
             try:
+                # If forking to background
                 if args[-1] == '&':
                     for i in range(1, len(args[:-1])):
+                        # If forking and overwriting
                         if args[i] == '>':
                             try:
                                 self.overwrite(
@@ -65,11 +72,14 @@ class MyShell():
                                 )
                                 self.line()
                             except IndexError:
+                                # If no filename is provided
                                 print('Error: No filename given')
                                 self.line()
                             except FileNotFoundError:
+                                # If the command is invalid
                                 print(invalid)
                                 self.line()
+                        # If forking and using append
                         elif args[i] == '>>':
                             try:
                                 self.append(
@@ -78,29 +88,38 @@ class MyShell():
                                            )
                                 self.line()
                             except IndexError:
+                                # If no filename is given
                                 print('Error: No filename given')
                                 self.line()
                             except FileNotFoundError:
+                                # I fthe command is invalid
                                 print(invalid)
                                 self.line()
                         else:
                             try:
+                                # If not using IO redirection
                                 subprocess.Popen(args[:-1])
                                 self.line()
                             except FileNotFoundError:
+                                # If the command is invalid
                                 print(invalid)
                                 self.line()
                 else:
+                    # If not forking to background
                     try:
                         subprocess.run(args)
                         self.line()
                     except FileNotFoundError:
+                        # If the command is invalid
                         print(invalid)
                         self.line()
             except PermissionError:
                 self.line()
 
     def do_help(self, args):
+
+        ''' prints a helpstring for any of the built in commands '''
+
         h_dir = "\
 lists the contents of the given directory \
 or the current directory if none is given"
@@ -129,15 +148,18 @@ given a specific command, gives the usage of that command"
                      'help': h_help
                     }
         try:
+            # When using help followed by a command
             print(f'{help_list[args[0]]}')
             self.line()
         except IndexError:
+            # When help is typed with no arguments
             print('Type "help" followed by one of the \
 following commands for more information')
             print('='*len("   ".join(a for a in help_list)))
             print(f"{'   '.join([a for a in help_list])}")
             self.line()
         except KeyError:
+            # If the command is not a built in command
             print('\
 Type "help" followed by one of the \
 following commands for more information')
@@ -147,11 +169,14 @@ following commands for more information')
 
     def do_pause(self, args):
 
+        # Pauses the shell until enter is pressed
         getpass(prompt='press "Enter" to resume shell function')
         self.line()
 
     def do_clr(self, args):
 
+        # Clears the terminal and returns the prompt
+        # to the top of the terminal
         sys.stdout.write('\033[2J\033[H')
         self.line()
 
