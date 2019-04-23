@@ -1,0 +1,73 @@
+SEATURTLE(1)                                  General Commands Manual                                 SEATURTLE(1)
+
+NAME
+       SeaTurtle - A simple shell built in python3.7.2
+
+SYNOPSIS
+       python3 myshell.py [file]
+
+DESCRIPTION
+       SeaTurtle  is  a simple command line shell written in Python3.7.2, which also has functionality allowing it
+       to execute batch commands. It features a number of built-in commands as well as being compatible  with  all
+       other UNIX commands, provided they are installed.
+
+USAGE
+   Options
+       [file] Executes the commands in the file and then exits the shell.
+
+   Shell Commands
+       dir [path/to/directory|< filename] [> filename|>> filename]
+
+              Returns  the  contents  of  the  given  directory, or prints the current directory if no argument is
+              given.
+
+       clr
+
+              Clears the terminal
+
+       echo comment|< filename [> filename|>> filename]
+
+              Prints the comment back out to the terminal.
+
+       cd [path/to/directory|< filename]
+
+              Changes the current directory to the given one, or displays the current path if none is given.
+
+       environ [> filename|>> filename]
+
+              Returns all environment variables and their respective values.
+
+       pause
+
+              Pauses use of the shell until the return key is pressed.
+
+       quit
+
+              Closes the shell
+
+   Subprocesses
+       Process [< filename] [> filename|>> filename] [&]
+
+              If the given command is not a built-in function of the  shell,  it  will  be  executed  as  a  child
+              process, for example python3 foo.py is perfectly valid and will execute as normal.
+
+              Using  & at the end of the line will cause the process to be forked and the shell will return to the
+              prompt after executing said process.
+
+   I/O Redirection
+       command < <filename>
+
+              Uses the given file as input for the command.
+
+       command >> <filename>
+
+              Appends the output of the command to the given file.
+
+       command > <filename>
+
+              Overwrites data in the given file with the output of the command.
+
+AUTHOR
+       Sean Moloney <https://github.com/MrFuentes>
+
+V1.0                                                 2019-3-27                                        SEATURTLE(1)
